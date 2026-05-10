@@ -1,0 +1,106 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Admin {
+  id           Int      @id @default(autoincrement())
+  username     String   @unique
+  passwordHash String   @map("password_hash")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  @@map("admins")
+}
+
+model Plan {
+  id        Int      @id @default(autoincrement())
+  name      String
+  speedMbps Int      @map("speed_mbps")
+  price     Float
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  customers Customer[]
+
+  @@map("plans")
+}
+
+model Customer {
+  id               Int      @id @default(autoincrement())
+  name             String
+  address          String
+  area             Int
+  whatsapp         String
+  planId           Int      @map("plan_id")
+  discount         Float    @default(0)
+  status           String   @default("active") // "active" | "suspended"
+  registrationDate DateTime @map("registration_date")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  plan     Plan      @relation(fields: [planId], references: [id])
+  invoices Invoice[]
+
+  @@map("customers")
+}
+
+model Invoice {
+  id            Int       @id @default(autoincrement())
+  customerId    Int       @map("customer_id")
+  invoiceNumber String    @unique @map("invoice_number")
+  billingMonth  Int       @map("billing_month")
+  billingYear   Int       @map("billing_year")
+  amount        Float
+  discount      Float     @default(0)
+  total         Float
+  status        String    @default("unpaid") // "paid" | "unpaid" | "overdue"
+  dueDate       DateTime  @map("due_date")
+  paidDate      DateTime? @map("paid_date")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  customer Customer @relation(fields: [customerId], references: [id])
+  payment  Payment?
+
+  @@index([billingMonth, billingYear])
+  @@map("invoices")
+}
+
+model Payment {
+  id        Int      @id @default(autoincrement())
+  invoiceId Int      @unique @map("invoice_id")
+  amount    Float
+  method    String?
+  notes     String?
+  paidAt    DateTime @map("paid_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  invoice Invoice @relation(fields: [invoiceId], references: [id])
+
+  @@map("payments")
+}
+
+model Operational {
+  id          Int      @id @default(autoincrement())
+  name        String
+  amount      Float
+  expenseDate DateTime @map("expense_date")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("operationals")
+}
+
+model ReminderTemplate {
+  id              Int      @id @default(autoincrement())
+  type            String   @unique // "reminder" | "receipt"
+  templateContent String   @map("template_content")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@map("reminder_templates")
+}
