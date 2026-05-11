@@ -28,21 +28,22 @@ export default function ReportsPage() {
     const [month, setMonth] = useState(new Date().getMonth() + 1 + "");
     const [year, setYear] = useState(new Date().getFullYear() + "");
     const [metrics, setMetrics] = useState<any>(null);
-    const [invoices, setInvoices] = useState<any[]>([]);
+    const [transactions, setTransactions] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         setIsLoading(true);
         Promise.all([
             fetch(`/api/dashboard?month=${month}&year=${year}`).then(res => res.json()),
-            fetch(`/api/invoices?month=${month}&year=${year}`).then(res => res.json())
+            fetch(`/api/reports/transactions?month=${month}&year=${year}`).then(res => res.json())
         ])
-            .then(([dashboardData, invoiceData]) => {
+            .then(([dashboardData, transactionData]) => {
                 setMetrics(dashboardData);
-                setInvoices(invoiceData);
+                setTransactions(transactionData);
                 setIsLoading(false);
             })
-            .catch(() => {
+            .catch((err) => {
+                console.error(err);
                 toast.error("Gagal memuat laporan");
                 setIsLoading(false);
             });
@@ -97,7 +98,7 @@ export default function ReportsPage() {
                 <Card className="card-hover">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium text-muted-foreground">
-                            Total Operasional
+                            Paid Operational
                         </CardTitle>
                         <div className="p-2 rounded-lg bg-red-500/10">
                             <TrendingDown className="h-4 w-4 text-red-600" />
@@ -111,7 +112,7 @@ export default function ReportsPage() {
                                 {formatIDR(metrics?.operationals || 0)}
                             </div>
                         )}
-                        <p className="text-xs text-muted-foreground mt-1">Pengeluaran bulan ini</p>
+                        <p className="text-xs text-muted-foreground mt-1">Pengeluaran lunas bulan ini</p>
                     </CardContent>
                 </Card>
 
@@ -133,19 +134,18 @@ export default function ReportsPage() {
                             </div>
                         )}
                         <p className="text-xs text-muted-foreground mt-1">
-                            Revenue − Operasional
+                            Revenue − Paid Operasional
                         </p>
                     </CardContent>
                 </Card>
             </div>
 
-            {/* Invoice Table */}
             <div className="flex flex-col gap-3 animate-fade-in-up" style={{ animationDelay: "200ms" }}>
                 <div className="flex items-center justify-between">
-                    <h2 className="text-lg font-semibold tracking-tight">Detail Invoice</h2>
+                    <h2 className="text-lg font-semibold tracking-tight">Detail Transaksi</h2>
                     {!isLoading && (
                         <Badge variant="secondary" className="text-xs">
-                            {invoices.length} invoice
+                            {transactions.length} transaksi
                         </Badge>
                     )}
                 </div>
@@ -153,39 +153,41 @@ export default function ReportsPage() {
                     <Table className="min-w-[600px]">
                         <TableHeader>
                             <TableRow>
-                                <TableHead>No. Invoice</TableHead>
-                                <TableHead>Pelanggan</TableHead>
-                                <TableHead>Total</TableHead>
-                                <TableHead>Tgl. Bayar</TableHead>
-                                <TableHead className="text-right">Status</TableHead>
+                                <TableHead>Tanggal</TableHead>
+                                <TableHead>Keterangan</TableHead>
+                                <TableHead>Referensi</TableHead>
+                                <TableHead className="text-right">Jumlah</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {isLoading ? (
                                 Array.from({ length: 5 }).map((_, i) => (
                                     <TableRow key={i}>
-                                        <TableCell><Skeleton className="h-4 w-28" /></TableCell>
                                         <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                                        <TableCell><Skeleton className="h-4 w-32" /></TableCell>
                                         <TableCell><Skeleton className="h-4 w-20" /></TableCell>
-                                        <TableCell><Skeleton className="h-4 w-20" /></TableCell>
-                                        <TableCell className="text-right"><Skeleton className="h-5 w-16 ml-auto" /></TableCell>
+                                        <TableCell className="text-right"><Skeleton className="h-4 w-24 ml-auto" /></TableCell>
                                     </TableRow>
                                 ))
-                            ) : invoices.length === 0 ? (
+                            ) : transactions.length === 0 ? (
                                 <TableRow>
-                                    <TableCell colSpan={5} className="h-24 text-center text-muted-foreground">Tidak ada invoice untuk periode ini.</TableCell>
+                                    <TableCell colSpan={4} className="h-24 text-center text-muted-foreground">Tidak ada transaksi untuk periode ini.</TableCell>
                                 </TableRow>
                             ) : (
-                                invoices.map((inv) => (
-                                    <TableRow key={inv.id}>
-                                        <TableCell className="font-medium font-mono text-xs">{inv.invoiceNumber}</TableCell>
-                                        <TableCell>{inv.customer?.name}</TableCell>
-                                        <TableCell className="font-semibold">{formatIDR(inv.total)}</TableCell>
-                                        <TableCell>{inv.payment?.paidDate ? new Date(inv.payment.paidDate).toLocaleDateString() : <span className="text-muted-foreground">-</span>}</TableCell>
-                                        <TableCell className="text-right">
-                                            <Badge variant={STATUS_VARIANT[inv.status] as any}>
-                                                {inv.status.charAt(0).toUpperCase() + inv.status.slice(1)}
-                                            </Badge>
+                                transactions.map((tx) => (
+                                    <TableRow key={tx.id}>
+                                        <TableCell className="text-sm">
+                                            {new Date(tx.date).toLocaleDateString()}
+                                        </TableCell>
+                                        <TableCell>
+                                            <div className="flex flex-col">
+                                                <span className="font-medium">{tx.description}</span>
+                                                <span className="text-xs text-muted-foreground capitalize">{tx.type}</span>
+                                            </div>
+                                        </TableCell>
+                                        <TableCell className="text-xs font-mono">{tx.reference}</TableCell>
+                                        <TableCell className={`text-right font-semibold ${tx.type === "revenue" ? "text-emerald-600" : "text-red-600"}`}>
+                                            {tx.type === "revenue" ? "+" : ""}{formatIDR(tx.amount)}
                                         </TableCell>
                                     </TableRow>
                                 ))

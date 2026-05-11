@@ -48,7 +48,7 @@ export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
                     <Wifi className="h-5 w-5" />
                 </div>
                 <div className="flex flex-col">
-                    <span className="text-lg font-bold tracking-tight leading-tight">RT-NET</span>
+                    <span className="text-lg font-bold tracking-tight leading-tight">ANFIELDNET</span>
                     <span className="text-[10px] text-muted-foreground font-medium tracking-widest uppercase">Billing System</span>
                 </div>
             </div>

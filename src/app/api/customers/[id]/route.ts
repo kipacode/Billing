@@ -16,6 +16,7 @@ export async function GET(
                 invoices: {
                     where: { billingYear: currentYear },
                     orderBy: { billingMonth: "desc" },
+                    include: { payment: true },
                 },
             },
         });

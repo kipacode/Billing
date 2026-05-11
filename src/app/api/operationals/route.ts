@@ -1,9 +1,29 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 
-export async function GET() {
+export async function GET(request: Request) {
+    const { searchParams } = new URL(request.url);
+    const month = searchParams.get("month");
+    const year = searchParams.get("year");
+    const status = searchParams.get("status");
+
     try {
+        const filters: any = {};
+        if (status) filters.status = status;
+
+        if (month && year) {
+            const m = parseInt(month, 10);
+            const y = parseInt(year, 10);
+            const startDate = new Date(y, m - 1, 1);
+            const endDate = new Date(y, m, 0, 23, 59, 59, 999);
+            filters.expenseDate = {
+                gte: startDate,
+                lte: endDate,
+            };
+        }
+
         const operationals = await prisma.operational.findMany({
+            where: filters,
             orderBy: { expenseDate: "desc" },
         });
         return NextResponse.json(operationals);

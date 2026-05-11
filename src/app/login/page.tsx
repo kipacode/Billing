@@ -60,7 +60,7 @@ export default function LoginPage() {
                                 <Wifi className="h-7 w-7" />
                             </div>
                         </div>
-                        <CardTitle className="text-2xl font-bold tracking-tight">RT-NET Billing</CardTitle>
+                        <CardTitle className="text-2xl font-bold tracking-tight">ANFIELDNET Billing</CardTitle>
                         <CardDescription className="text-muted-foreground/80">
                             Masuk ke akun admin Anda
                         </CardDescription>
@@ -128,7 +128,7 @@ export default function LoginPage() {
                 </Card>
 
                 <p className="text-center text-xs text-muted-foreground/50 mt-6">
-                    RT-NET Billing &amp; Invoice Management System
+                    ANFIELDNET Billing &amp; Invoice Management System
                 </p>
             </div>
         </div>

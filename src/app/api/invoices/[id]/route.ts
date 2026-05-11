@@ -24,12 +24,13 @@ export async function PUT(
                 update: {
                     paidAt: new Date(json.paidDate),
                     amount: invoice.total,
+                    method: json.method || "cash",
                 },
                 create: {
                     invoiceId: id,
                     amount: invoice.total,
                     paidAt: new Date(json.paidDate),
-                    method: "transfer", // default
+                    method: json.method || "cash",
                 },
             });
         }

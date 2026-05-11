@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "RTRW-NET Billing",
+  title: "ANFIELDNET Billing",
   description: "Billing & Invoice Management System",
 };
 

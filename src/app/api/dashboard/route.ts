@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { updateOverdueInvoices } from "@/lib/invoice-utils";
 
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
@@ -7,23 +8,50 @@ export async function GET(request: Request) {
     const year = searchParams.get("year");
 
     try {
-        const filters: any = {};
-        if (month) filters.billingMonth = parseInt(month, 10);
-        if (year) filters.billingYear = parseInt(year, 10);
+        // Automatically sync overdue statuses before fetching metrics
+        await updateOverdueInvoices();
 
-        // 1. Total Revenue (from Paid invoices matching month/year)
-        const paidInvoices = await prisma.invoice.aggregate({
-            where: { ...filters, status: "paid" },
-            _sum: { total: true },
+        const filters: any = {};
+        let dateRangeFilter: any = undefined;
+
+        if (month && year) {
+            const m = parseInt(month, 10);
+            const y = parseInt(year, 10);
+            
+            filters.billingMonth = m;
+            filters.billingYear = y;
+
+            const startDate = new Date(y, m - 1, 1);
+            const endDate = new Date(y, m, 0, 23, 59, 59, 999);
+            
+            dateRangeFilter = {
+                gte: startDate,
+                lte: endDate,
+            };
+        } else if (month) {
+            filters.billingMonth = parseInt(month, 10);
+        } else if (year) {
+            filters.billingYear = parseInt(year, 10);
+        }
+
+        // 1. Total Revenue (Cash-Basis: from Payments made in the selected month/year)
+        const paymentFilters: any = {};
+        if (dateRangeFilter) {
+            paymentFilters.paidAt = dateRangeFilter;
+        }
+        
+        const payments = await prisma.payment.aggregate({
+            where: paymentFilters,
+            _sum: { amount: true },
         });
-        const revenue = paidInvoices._sum.total || 0;
+        const revenue = payments._sum.amount || 0;
 
         // 2. Active Customers Count
         const activeCustomers = await prisma.customer.count({
             where: { status: "active" },
         });
 
-        // 3. Pending/Overdue counts
+        // 3. Pending/Overdue counts (Accrual-Basis: invoices billed in selected month/year)
         const pendingInvoices = await prisma.invoice.count({
             where: { ...filters, status: "unpaid" },
         });
@@ -39,19 +67,13 @@ export async function GET(request: Request) {
             take: 5,
         });
 
-        // 5. Total Operationals
-        let opFilters: any = {};
-        if (month && year) {
-            // Find operationals in that specific month and year
-            const m = parseInt(month, 10);
-            const y = parseInt(year, 10);
-            const startDate = new Date(y, m - 1, 1);
-            const endDate = new Date(y, m, 0, 23, 59, 59, 999);
-            opFilters.expenseDate = {
-                gte: startDate,
-                lte: endDate,
-            };
+        // 5. Total Operationals (Cash-Basis: expenses paid in the selected month/year)
+        let opFilters: any = { status: "paid" };
+        if (dateRangeFilter) {
+            // Use paidDate instead of expenseDate for true cash-flow tracking
+            opFilters.paidDate = dateRangeFilter;
         }
+
         const ops = await prisma.operational.aggregate({
             where: opFilters,
             _sum: { amount: true },

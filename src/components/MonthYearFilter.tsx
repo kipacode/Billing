@@ -1,5 +1,7 @@
 "use client";
 
+import * as React from "react";
+
 import {
     Select,
     SelectContent,
@@ -45,6 +47,16 @@ export function MonthYearFilter({
     onMonthChange,
     onYearChange,
 }: MonthYearFilterProps) {
+    const [mounted, setMounted] = React.useState(false);
+
+    React.useEffect(() => {
+        setMounted(true);
+    }, []);
+
+    if (!mounted) {
+        return <div className="h-8 w-[240px] bg-muted/20 animate-pulse rounded-lg" />;
+    }
+
     return (
         <div className="flex items-center gap-2 sm:gap-3">
             <Select value={month} onValueChange={safeChange(onMonthChange)}>

@@ -66,10 +66,15 @@ const METRIC_CARDS = [
 ];
 
 export default function DashboardPage() {
+    const [mounted, setMounted] = useState(false);
     const [month, setMonth] = useState(new Date().getMonth() + 1 + "");
     const [year, setYear] = useState(new Date().getFullYear() + "");
     const [data, setData] = useState<DashboardData | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
     useEffect(() => {
         setIsLoading(true);
@@ -84,6 +89,8 @@ export default function DashboardPage() {
                 setIsLoading(false);
             });
     }, [month, year]);
+
+    if (!mounted) return null;
 
     return (
         <div className="flex flex-col gap-6">

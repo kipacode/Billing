@@ -76,6 +76,8 @@ export default function CustomersPage() {
     const [customers, setCustomers] = useState<Customer[]>([]);
     const [plans, setPlans] = useState<Plan[]>([]);
     const [search, setSearch] = useState("");
+    const [filterArea, setFilterArea] = useState<string>("all");
+    const [filterPlan, setFilterPlan] = useState<string>("all");
     const router = useRouter();
     const [isAddOpen, setIsAddOpen] = useState(false);
     const [editCustomer, setEditCustomer] = useState<Customer | null>(null);
@@ -106,9 +108,12 @@ export default function CustomersPage() {
     }, []);
 
     const filtered = customers.filter(
-        (c) =>
-            c.name.toLowerCase().includes(search.toLowerCase()) ||
-            c.whatsapp.includes(search)
+        (c) => {
+            const matchesSearch = c.name.toLowerCase().includes(search.toLowerCase()) || c.whatsapp.includes(search);
+            const matchesArea = filterArea === "all" || c.area.toString() === filterArea;
+            const matchesPlan = filterPlan === "all" || c.planId.toString() === filterPlan;
+            return matchesSearch && matchesArea && matchesPlan;
+        }
     );
 
     const handleAdd = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -211,7 +216,7 @@ export default function CustomersPage() {
                         <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Pelanggan</h1>
                         {!isLoading && (
                             <Badge variant="secondary" className="text-xs font-normal">
-                                {customers.length} total
+                                {filtered.length} total
                             </Badge>
                         )}
                     </div>
@@ -240,8 +245,8 @@ export default function CustomersPage() {
                 </Dialog>
             </div>
 
-            <div className="flex items-center gap-2 w-full sm:max-w-sm">
-                <div className="relative flex-1">
+            <div className="flex flex-col sm:flex-row gap-2 w-full">
+                <div className="relative flex-1 sm:max-w-sm">
                     <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                     <Input
                         placeholder="Cari pelanggan..."
@@ -250,6 +255,28 @@ export default function CustomersPage() {
                         onChange={(e) => setSearch(e.target.value)}
                     />
                 </div>
+                <Select value={filterArea} onValueChange={setFilterArea}>
+                    <SelectTrigger className="w-full sm:w-[150px]">
+                        <SelectValue placeholder="Semua Area" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="all">Semua Area</SelectItem>
+                        {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
+                            <SelectItem key={n} value={n.toString()}>Area {n}</SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+                <Select value={filterPlan} onValueChange={setFilterPlan}>
+                    <SelectTrigger className="w-full sm:w-[180px]">
+                        <SelectValue placeholder="Semua Paket" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="all">Semua Paket</SelectItem>
+                        {plans.map((p) => (
+                            <SelectItem key={p.id} value={p.id.toString()}>{p.name} {p.speedMbps}Mbps</SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
             </div>
 
             <div className="rounded-lg border bg-card overflow-x-auto">

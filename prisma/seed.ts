@@ -110,7 +110,7 @@ async function main() {
         update: {},
         create: {
             type: "reminder",
-            templateContent: `Halo {{nama}},\n\nIni adalah pengingat bahwa tagihan internet Anda sebesar {{total}} untuk bulan {{bulan}} sudah melewati jatuh tempo.\n\nMohon segera lakukan pembayaran. Terima kasih.\n\n— Admin RT-NET`,
+            templateContent: `Halo {{nama}},\n\nIni adalah pengingat bahwa tagihan internet Anda sebesar {{total}} untuk bulan {{bulan}} sudah melewati jatuh tempo.\n\nMohon segera lakukan pembayaran. Terima kasih.\n\n— Admin ANFIELDNET`,
         },
     });
 
@@ -119,7 +119,7 @@ async function main() {
         update: {},
         create: {
             type: "receipt",
-            templateContent: `Struk Pembayaran Internet RT-NET\n\nPelanggan: {{nama}}\nPeriode: {{bulan}}\nTotal: {{total}}\nStatus: LUNAS\n\nTerima kasih atas pembayaran Anda!\n\n— Admin RT-NET`,
+            templateContent: `Struk Pembayaran Internet ANFIELDNET\n\nPelanggan: {{nama}}\nPeriode: {{bulan}}\nTotal: {{total}}\nStatus: LUNAS\n\nTerima kasih atas pembayaran Anda!\n\n— Admin ANFIELDNET`,
         },
     });
     console.log("✓ Reminder templates seeded");

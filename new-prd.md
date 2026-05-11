@@ -1,4 +1,4 @@
-# RT-NET Billing & Invoice Management System - PRD
+# ANFIELDNET Billing & Invoice Management System - PRD
 
 ## 1. Overview
 Aplikasi ini bertujuan untuk membantu admin dalam mengelola pelanggan, tagihan dan pembayaran pelanggan internet.

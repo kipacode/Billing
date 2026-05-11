@@ -22,15 +22,33 @@ export async function GET() {
 
 export async function PUT(request: Request) {
     try {
-        const json = await request.json(); // expected { type: "reminder", content: "..." }
+        const json = await request.json(); // expected { reminder: "...", receipt: "..." }
 
-        const template = await prisma.reminderTemplate.upsert({
-            where: { type: json.type },
-            update: { templateContent: json.content },
-            create: { type: json.type, templateContent: json.content },
-        });
+        const updates = [];
 
-        return NextResponse.json(template);
+        if (typeof json.reminder === 'string') {
+            updates.push(
+                prisma.reminderTemplate.upsert({
+                    where: { type: "reminder" },
+                    update: { templateContent: json.reminder },
+                    create: { type: "reminder", templateContent: json.reminder },
+                })
+            );
+        }
+
+        if (typeof json.receipt === 'string') {
+            updates.push(
+                prisma.reminderTemplate.upsert({
+                    where: { type: "receipt" },
+                    update: { templateContent: json.receipt },
+                    create: { type: "receipt", templateContent: json.receipt },
+                })
+            );
+        }
+
+        await prisma.$transaction(updates);
+
+        return NextResponse.json({ success: true });
     } catch (error) {
         console.error("Error updating template:", error);
         return NextResponse.json(

@@ -23,7 +23,7 @@ const PAGE_TITLES: Record<string, string> = {
 
 export function Header() {
     const pathname = usePathname();
-    const title = PAGE_TITLES[pathname] || "RT-NET Billing";
+    const title = PAGE_TITLES[pathname] || "ANFIELDNET Billing";
     const [mobileOpen, setMobileOpen] = useState(false);
 
     return (
