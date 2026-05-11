@@ -78,6 +78,11 @@ export default function CustomersPage() {
     const [search, setSearch] = useState("");
     const [filterArea, setFilterArea] = useState<string>("all");
     const [filterPlan, setFilterPlan] = useState<string>("all");
+
+    // Helper to satisfy Select onValueChange which can pass null in some versions
+    const safeChange = (fn: (v: string) => void) => (v: string | null) => {
+        if (v !== null) fn(v);
+    };
     const router = useRouter();
     const [isAddOpen, setIsAddOpen] = useState(false);
     const [editCustomer, setEditCustomer] = useState<Customer | null>(null);
@@ -255,7 +260,7 @@ export default function CustomersPage() {
                         onChange={(e) => setSearch(e.target.value)}
                     />
                 </div>
-                <Select value={filterArea} onValueChange={setFilterArea}>
+                <Select value={filterArea} onValueChange={safeChange(setFilterArea)}>
                     <SelectTrigger className="w-full sm:w-[150px]">
                         <SelectValue placeholder="Semua Area" />
                     </SelectTrigger>
@@ -266,7 +271,7 @@ export default function CustomersPage() {
                         ))}
                     </SelectContent>
                 </Select>
-                <Select value={filterPlan} onValueChange={setFilterPlan}>
+                <Select value={filterPlan} onValueChange={safeChange(setFilterPlan)}>
                     <SelectTrigger className="w-full sm:w-[180px]">
                         <SelectValue placeholder="Semua Paket" />
                     </SelectTrigger>
