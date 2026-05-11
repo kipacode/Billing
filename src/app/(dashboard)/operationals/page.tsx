@@ -34,6 +34,7 @@ import {
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Label } from "@/components/ui/label";
+import { MonthYearFilter } from "@/components/MonthYearFilter";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -80,11 +81,14 @@ export default function OperationalsPage() {
     
     const [tab, setTab] = useState<FilterTab>("all");
     const [search, setSearch] = useState("");
+    
+    const [month, setMonth] = useState(new Date().getMonth() + 1 + "");
+    const [year, setYear] = useState(new Date().getFullYear() + "");
 
     const fetchData = async () => {
         setIsLoading(true);
         try {
-            const res = await fetch("/api/operationals");
+            const res = await fetch(`/api/operationals?month=${month}&year=${year}`);
             if (!res.ok) throw new Error("Failed to fetch");
             const data = await res.json();
             
@@ -106,7 +110,7 @@ export default function OperationalsPage() {
 
     useEffect(() => {
         fetchData();
-    }, []);
+    }, [month, year]);
 
     const handleAdd = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -232,22 +236,31 @@ export default function OperationalsPage() {
                     </p>
                 </div>
 
-                <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
-                    {/* @ts-expect-error React 19 typing conflict with Radix */}
-                    <DialogTrigger asChild>
-                        <Button>
-                            <PlusCircle className="mr-2 h-4 w-4" />
-                            Tambah Operasional
-                        </Button>
-                    </DialogTrigger>
-                    <DialogContent className="sm:max-w-[400px]">
-                        <DialogHeader>
-                            <DialogTitle>Tambah Biaya Operasional</DialogTitle>
-                            <DialogDescription>Catat pengeluaran baru.</DialogDescription>
-                        </DialogHeader>
-                        <OpForm onSubmit={handleAdd} />
-                    </DialogContent>
-                </Dialog>
+                <div className="flex flex-wrap items-center gap-3">
+                    <MonthYearFilter
+                        month={month}
+                        year={year}
+                        onMonthChange={setMonth}
+                        onYearChange={setYear}
+                    />
+
+                    <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
+                        {/* @ts-expect-error React 19 typing conflict with Radix */}
+                        <DialogTrigger asChild>
+                            <Button>
+                                <PlusCircle className="mr-2 h-4 w-4" />
+                                Tambah Operasional
+                            </Button>
+                        </DialogTrigger>
+                        <DialogContent className="sm:max-w-[400px]">
+                            <DialogHeader>
+                                <DialogTitle>Tambah Biaya Operasional</DialogTitle>
+                                <DialogDescription>Catat pengeluaran baru.</DialogDescription>
+                            </DialogHeader>
+                            <OpForm onSubmit={handleAdd} />
+                        </DialogContent>
+                    </Dialog>
+                </div>
             </div>
 
             {/* Summary */}
