@@ -29,7 +29,11 @@ export async function GET(request: Request) {
                 },
                 payment: true,
             },
-            orderBy: { dueDate: "asc" },
+            orderBy: {
+                customer: {
+                    name: "asc",
+                },
+            },
         });
 
         return NextResponse.json(invoices);

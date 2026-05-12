@@ -304,8 +304,18 @@ export default function OperationalsPage() {
                 </Card>
             </div>
 
-            {/* Tabs + Search */}
+            {/* Search + Tabs */}
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="relative max-w-sm w-full">
+                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <Input
+                        placeholder="Cari operasional..."
+                        className="pl-8"
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                    />
+                </div>
+
                 <div className="flex items-center gap-1 rounded-lg border bg-card p-1 overflow-x-auto">
                     {tabs.map((t) => (
                         <button
@@ -324,16 +334,6 @@ export default function OperationalsPage() {
                             )}
                         </button>
                     ))}
-                </div>
-
-                <div className="relative max-w-sm w-full">
-                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                    <Input
-                        placeholder="Cari operasional..."
-                        className="pl-8"
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                    />
                 </div>
             </div>
 

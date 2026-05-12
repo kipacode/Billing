@@ -349,8 +349,18 @@ export default function InvoicesPage() {
                 </div>
             </div>
 
-            {/* Tabs + Search */}
+            {/* Search + Tabs */}
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="relative max-w-sm w-full">
+                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <Input
+                        placeholder="Cari invoice atau pelanggan..."
+                        className="pl-8"
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                    />
+                </div>
+
                 <div className="flex items-center gap-1 rounded-lg border bg-card p-1 overflow-x-auto">
                     {tabs.map((t) => (
                         <button
@@ -370,16 +380,6 @@ export default function InvoicesPage() {
                         </button>
                     ))}
                 </div>
-
-                <div className="relative max-w-sm w-full">
-                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                    <Input
-                        placeholder="Cari invoice atau pelanggan..."
-                        className="pl-8"
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                    />
-                </div>
             </div>
 
             {/* Table */}
@@ -390,7 +390,6 @@ export default function InvoicesPage() {
                             <TableHead>No. Invoice</TableHead>
                             <TableHead>Pelanggan</TableHead>
                             <TableHead>Total</TableHead>
-                            <TableHead>Jatuh Tempo</TableHead>
                             <TableHead>Status</TableHead>
                             <TableHead className="text-right">Aksi</TableHead>
                         </TableRow>
@@ -402,14 +401,13 @@ export default function InvoicesPage() {
                                     <TableCell><Skeleton className="h-4 w-28" /></TableCell>
                                     <TableCell><Skeleton className="h-4 w-24" /></TableCell>
                                     <TableCell><Skeleton className="h-4 w-20" /></TableCell>
-                                    <TableCell><Skeleton className="h-4 w-20" /></TableCell>
                                     <TableCell><Skeleton className="h-5 w-16" /></TableCell>
                                     <TableCell className="text-right"><Skeleton className="h-7 w-16 ml-auto" /></TableCell>
                                 </TableRow>
                             ))
                         ) : filtered.length === 0 ? (
                             <TableRow>
-                                <TableCell colSpan={6} className="h-24 text-center text-muted-foreground">
+                                <TableCell colSpan={5} className="h-24 text-center text-muted-foreground">
                                     Tidak ada invoice ditemukan.
                                 </TableCell>
                             </TableRow>
@@ -425,7 +423,6 @@ export default function InvoicesPage() {
                                     <TableCell className="font-semibold">
                                         {formatIDR(inv.total)}
                                     </TableCell>
-                                    <TableCell>{new Date(inv.dueDate).toLocaleDateString()}</TableCell>
                                     <TableCell>
                                         <Badge variant={STATUS_VARIANT[inv.status]}>
                                             {STATUS_LABELS[inv.status]}

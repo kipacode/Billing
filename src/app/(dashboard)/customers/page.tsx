@@ -119,7 +119,7 @@ export default function CustomersPage() {
             const matchesPlan = filterPlan === "all" || c.planId.toString() === filterPlan;
             return matchesSearch && matchesArea && matchesPlan;
         }
-    );
+    ).sort((a, b) => a.name.localeCompare(b.name));
 
     const handleAdd = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -289,10 +289,8 @@ export default function CustomersPage() {
                     <TableHeader>
                         <TableRow>
                             <TableHead>Pelanggan</TableHead>
-                            <TableHead>Alamat</TableHead>
-                            <TableHead>Area / Paket</TableHead>
-                            <TableHead>Diskon</TableHead>
-                            <TableHead>Status</TableHead>
+                            <TableHead>Paket</TableHead>
+                            <TableHead>Area</TableHead>
                             <TableHead className="text-right">Aksi</TableHead>
                         </TableRow>
                     </TableHeader>
@@ -301,16 +299,14 @@ export default function CustomersPage() {
                             Array.from({ length: 5 }).map((_, i) => (
                                 <TableRow key={i}>
                                     <TableCell><div className="space-y-1"><Skeleton className="h-4 w-28" /><Skeleton className="h-3 w-20" /></div></TableCell>
-                                    <TableCell><Skeleton className="h-4 w-36" /></TableCell>
-                                    <TableCell><div className="space-y-1"><Skeleton className="h-4 w-16" /><Skeleton className="h-3 w-24" /></div></TableCell>
+                                    <TableCell><Skeleton className="h-4 w-24" /></TableCell>
                                     <TableCell><Skeleton className="h-4 w-16" /></TableCell>
-                                    <TableCell><Skeleton className="h-5 w-16" /></TableCell>
                                     <TableCell className="text-right"><Skeleton className="h-8 w-8 ml-auto rounded-md" /></TableCell>
                                 </TableRow>
                             ))
                         ) : filtered.length === 0 ? (
                             <TableRow>
-                                <TableCell colSpan={6} className="h-24 text-center text-muted-foreground">
+                                <TableCell colSpan={4} className="h-24 text-center text-muted-foreground">
                                     Tidak ada pelanggan ditemukan.
                                 </TableCell>
                             </TableRow>
@@ -327,31 +323,12 @@ export default function CustomersPage() {
                                             {customer.whatsapp}
                                         </div>
                                     </TableCell>
-                                    <TableCell
-                                        className="max-w-[200px] truncate"
-                                        title={customer.address}
-                                    >
-                                        {customer.address}
+                                    <TableCell>
+                                        <div className="text-sm font-medium">{customer.plan?.name}</div>
+                                        <div className="text-[10px] text-muted-foreground">{customer.plan?.speedMbps}Mbps</div>
                                     </TableCell>
                                     <TableCell>
                                         <div className="text-sm">Area {customer.area}</div>
-                                        <div className="text-xs text-muted-foreground">
-                                            {customer.plan?.name} {customer.plan && `${customer.plan.speedMbps}Mbps`}
-                                        </div>
-                                    </TableCell>
-                                    <TableCell>
-                                        {customer.discount > 0
-                                            ? formatIDR(customer.discount)
-                                            : <span className="text-muted-foreground">-</span>}
-                                    </TableCell>
-                                    <TableCell>
-                                        <Badge
-                                            variant={
-                                                customer.status === "active" ? "default" : "destructive"
-                                            }
-                                        >
-                                            {customer.status === "active" ? "Active" : "Suspended"}
-                                        </Badge>
                                     </TableCell>
                                     <TableCell className="text-right">
                                         <div onClick={(e) => e.stopPropagation()}>
