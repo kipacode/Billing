@@ -154,6 +154,7 @@ export default function UsersPage() {
                 </div>
 
                 <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
+                    {/* @ts-expect-error React 19 typing conflict with Radix */}
                     <DialogTrigger asChild>
                         <Button>
                             <PlusCircle className="mr-2 h-4 w-4" />
@@ -220,6 +221,7 @@ export default function UsersPage() {
                                     </TableCell>
                                     <TableCell className="text-right">
                                         <DropdownMenu>
+                                            {/* @ts-expect-error React 19 typing conflict with Radix */}
                                             <DropdownMenuTrigger asChild>
                                                 <Button variant="ghost" size="icon" className="hover:bg-secondary/80">
                                                     <MoreHorizontal className="h-4 w-4" />
