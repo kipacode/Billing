@@ -40,7 +40,15 @@ interface Invoice {
     id: number;
     customerId: number;
     invoiceNumber: string;
-    customer: { name: string; whatsapp: string };
+    customer: { 
+        name: string; 
+        whatsapp: string;
+        plan: {
+            name: string;
+            price: number;
+        }
+    };
+    amount: number;
     total: number;
     billingMonth: number;
     billingYear: number;
@@ -79,6 +87,7 @@ export default function InvoicesPage() {
     const [isGenerating, setIsGenerating] = useState(false);
     const [isCancelling, setIsCancelling] = useState(false);
     const [receiptTemplate, setReceiptTemplate] = useState("");
+    const [selectedPaidIds, setSelectedPaidIds] = useState<number[]>([]);
 
     useEffect(() => {
         setMounted(true);
@@ -130,6 +139,24 @@ export default function InvoicesPage() {
     const handleRowClick = async (invoice: Invoice) => {
         if (invoice.status === "paid") {
             setManagePaidInvoice(invoice);
+            setSelectedPaidIds([invoice.id]);
+            setIsFetchingCustomerInvoices(true);
+            try {
+                const res = await fetch(`/api/invoices?customerId=${invoice.customerId}&status=paid`);
+                if (!res.ok) throw new Error("Gagal");
+                const allPaid: Invoice[] = await res.json();
+                setCustomerInvoices(allPaid);
+                
+                // Auto-select invoices with same paid date
+                const sameDateIds = allPaid
+                    .filter(inv => inv.payment?.paidAt === invoice.payment?.paidAt)
+                    .map(inv => inv.id);
+                setSelectedPaidIds(sameDateIds);
+            } catch (error) {
+                toast.error("Gagal mengambil history pembayaran");
+            } finally {
+                setIsFetchingCustomerInvoices(false);
+            }
             return;
         }
 
@@ -143,7 +170,7 @@ export default function InvoicesPage() {
             const allInvoices: Invoice[] = await res.json();
             setCustomerInvoices(allInvoices.filter(inv => inv.status !== "paid"));
         } catch (error) {
-            toast.error("Gagal mengambil data tagihan pelanggan");
+            toast.error("Gagal mengambil data iuran pelanggan");
         } finally {
             setIsFetchingCustomerInvoices(false);
         }
@@ -151,7 +178,7 @@ export default function InvoicesPage() {
 
     const handleMarkPaid = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        if (selectedIds.length === 0) return;
+        if (selectedIds.length === 0 || !payInvoice) return;
         const fd = new FormData(e.currentTarget);
         const paidDate = fd.get("paidDate") as string;
         const method = fd.get("method") as string;
@@ -165,25 +192,65 @@ export default function InvoicesPage() {
             if (!res.ok) throw new Error("Gagal");
 
             await fetchInvoices();
+            
+            const recentlyPaidIds = [...selectedIds];
+            const recentlyPaidInvoice = { ...payInvoice, status: "paid" as InvoiceStatus, payment: { paidAt: paidDate, method } };
+
             setPayInvoice(null);
-            setCustomerInvoices([]);
             setSelectedIds([]);
-            toast.success(`${selectedIds.length} invoice berhasil ditandai lunas.`);
+            toast.success(`${recentlyPaidIds.length} invoice berhasil ditandai lunas.`);
+
+            // Automatically open the "Manage Paid Invoice" dialog
+            setManagePaidInvoice(recentlyPaidInvoice);
+            setSelectedPaidIds(recentlyPaidIds);
+            setIsFetchingCustomerInvoices(true);
+            try {
+                const res2 = await fetch(`/api/invoices?customerId=${payInvoice.customerId}&status=paid`);
+                if (!res2.ok) throw new Error("Gagal");
+                const allPaid: Invoice[] = await res2.json();
+                setCustomerInvoices(allPaid);
+            } catch (error) {
+                toast.error("Gagal mengambil history pembayaran");
+            } finally {
+                setIsFetchingCustomerInvoices(false);
+            }
+
         } catch (error) {
             toast.error("Terjadi kesalahan");
         }
     };
 
-    const handleSendReceipt = (inv: Invoice) => {
-        const message = receiptTemplate
-            .replace("{{nama}}", inv.customer?.name || "")
-            .replace("{{total}}", formatIDR(inv.total))
-            .replace("{{bulan}}", `${inv.billingMonth}/${inv.billingYear}`);
+    const handleSendReceipt = (selectedInvoices: Invoice[]) => {
+        if (selectedInvoices.length === 0) return;
 
-        const w = inv.customer?.whatsapp || "";
+        const first = selectedInvoices[0];
+        
+        // Sort by billing date
+        const sorted = [...selectedInvoices].sort((a, b) => {
+            if (a.billingYear !== b.billingYear) return a.billingYear - b.billingYear;
+            return a.billingMonth - b.billingMonth;
+        });
+
+        const periods = sorted.map(inv => {
+            const date = new Date(inv.billingYear, inv.billingMonth - 1);
+            return date.toLocaleDateString('id-ID', { month: 'short', year: 'numeric' });
+        }).join(", ");
+
+        const totalAmount = selectedInvoices.reduce((sum, inv) => sum + inv.total, 0);
+        const planName = first.customer?.plan?.name || "Internet";
+        const planPrice = formatIDR(first.amount);
+
+        const message = receiptTemplate
+            .replace(/{{nama}}/g, first.customer?.name || "")
+            .replace(/{{total}}/g, formatIDR(totalAmount))
+            .replace(/{{bulan}}/g, periods)
+            .replace(/{{paket}}/g, planName)
+            .replace(/{{harga}}/g, planPrice);
+
+        const w = first.customer?.whatsapp || "";
         const waUrl = `https://wa.me/${w.replace(/^0/, "62")}?text=${encodeURIComponent(message)}`;
         window.open(waUrl, "_blank");
-        toast.success(`Membuka WhatsApp untuk ${inv.customer?.name}…`);
+        toast.success(`Membuka WhatsApp untuk ${first.customer?.name}…`);
     };
 
     const handleCancelPayment = async (inv: Invoice) => {
@@ -261,7 +328,7 @@ export default function InvoicesPage() {
                 <div className="flex flex-col gap-1">
                     <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Invoice</h1>
                     <p className="text-muted-foreground">
-                        Kelola tagihan dan lacak pembayaran.
+                        Kelola iuran dan lacak pembayaran.
                     </p>
                 </div>
                 <div className="flex flex-wrap items-center gap-3">
@@ -525,18 +592,58 @@ export default function InvoicesPage() {
                                     <span className="font-medium">{managePaidInvoice.customer?.name}</span>
                                 </div>
                                 <div className="flex justify-between items-center text-sm">
-                                    <span className="text-muted-foreground">Total Tagihan</span>
-                                    <span className="font-medium text-emerald-600">{formatIDR(managePaidInvoice.total)}</span>
+                                    <span className="text-muted-foreground">Paket</span>
+                                    <span className="font-medium">{managePaidInvoice.customer?.plan?.name} ({formatIDR(managePaidInvoice.amount)})</span>
                                 </div>
-                                <div className="flex justify-between items-center text-sm">
-                                    <span className="text-muted-foreground">Tanggal Bayar</span>
-                                    <span className="font-medium">
-                                        {managePaidInvoice.payment?.paidAt ? new Date(managePaidInvoice.payment.paidAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : "-"}
-                                    </span>
-                                </div>
-                                <div className="flex justify-between items-center text-sm">
-                                    <span className="text-muted-foreground">Metode</span>
-                                    <span className="font-medium uppercase">{managePaidInvoice.payment?.method || "-"}</span>
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label className="text-xs font-semibold uppercase text-muted-foreground">Pilih Invoice untuk Struk</Label>
+                                <div className="border rounded-md divide-y overflow-hidden">
+                                    {isFetchingCustomerInvoices ? (
+                                        <div className="p-4 space-y-2">
+                                            <Skeleton className="h-8 w-full" />
+                                            <Skeleton className="h-8 w-full" />
+                                        </div>
+                                    ) : (
+                                        <div className="max-h-[160px] overflow-y-auto">
+                                            {customerInvoices.map((inv) => (
+                                                <label
+                                                    key={inv.id}
+                                                    className="flex items-center justify-between p-3 hover:bg-muted/30 cursor-pointer transition-colors"
+                                                >
+                                                    <div className="flex items-center gap-3">
+                                                        <input
+                                                            type="checkbox"
+                                                            className="h-4 w-4 rounded border-gray-300"
+                                                            checked={selectedPaidIds.includes(inv.id)}
+                                                            onChange={() => setSelectedPaidIds(prev => 
+                                                                prev.includes(inv.id) ? prev.filter(i => i !== inv.id) : [...prev, inv.id]
+                                                            )}
+                                                        />
+                                                        <div className="flex flex-col">
+                                                            <span className="text-sm font-medium">{inv.invoiceNumber}</span>
+                                                            <span className="text-[10px] text-muted-foreground uppercase">
+                                                                {new Date(inv.billingYear, inv.billingMonth - 1).toLocaleDateString('id-ID', { month: 'long', year: 'numeric' })}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex flex-col items-end">
+                                                        <span className="text-sm font-semibold">{formatIDR(inv.total)}</span>
+                                                        <span className="text-[9px] text-muted-foreground">
+                                                            {inv.payment?.paidAt ? new Date(inv.payment.paidAt).toLocaleDateString() : ""}
+                                                        </span>
+                                                    </div>
+                                                </label>
+                                            ))}
+                                        </div>
+                                    )}
+                                    <div className="bg-muted/50 p-2 flex items-center justify-between">
+                                        <span className="text-xs font-medium">Total Terpilih</span>
+                                        <span className="text-xs font-bold text-emerald-600">
+                                            {formatIDR(customerInvoices.filter(i => selectedPaidIds.includes(i.id)).reduce((acc, curr) => acc + curr.total, 0))}
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -546,10 +653,11 @@ export default function InvoicesPage() {
                         <Button
                             type="button"
                             className="w-full bg-emerald-600 hover:bg-emerald-700"
-                            onClick={() => managePaidInvoice && handleSendReceipt(managePaidInvoice)}
+                            disabled={selectedPaidIds.length === 0}
+                            onClick={() => managePaidInvoice && handleSendReceipt(customerInvoices.filter(i => selectedPaidIds.includes(i.id)))}
                         >
                             <Send className="mr-2 h-4 w-4" />
-                            Kirim Struk via WhatsApp
+                            Kirim Struk ({selectedPaidIds.length}) via WhatsApp
                         </Button>
                         <Button
                             type="button"

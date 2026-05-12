@@ -70,9 +70,11 @@ export default function RemindersPage() {
 
     const handleSendReminder = (inv: any) => {
         const message = reminderTemplate
-            .replace("{{nama}}", inv.customer?.name || "")
-            .replace("{{total}}", formatIDR(inv.total))
-            .replace("{{bulan}}", `${month}/${year}`);
+            .replace(/{{nama}}/g, inv.customer?.name || "")
+            .replace(/{{total}}/g, formatIDR(inv.total))
+            .replace(/{{bulan}}/g, `${month}/${year}`)
+            .replace(/{{paket}}/g, inv.customer?.plan?.name || "")
+            .replace(/{{harga}}/g, formatIDR(inv.amount));
 
         const w = inv.customer?.whatsapp || "";
         const waUrl = `https://wa.me/${w.replace(/^0/, "62")}?text=${encodeURIComponent(message)}`;
@@ -93,7 +95,7 @@ export default function RemindersPage() {
                         )}
                     </div>
                     <p className="text-muted-foreground">
-                        Kirim pengingat tagihan overdue ke pelanggan via WhatsApp.
+                        Kirim pengingat iuran overdue ke pelanggan via WhatsApp.
                     </p>
                 </div>
                 <MonthYearFilter
@@ -187,7 +189,7 @@ export default function RemindersPage() {
                         />
                         <div className="flex items-center justify-between">
                             <p className="text-xs text-muted-foreground">
-                                Placeholder: {"{{nama}}"}, {"{{total}}"}, {"{{bulan}}"}
+                                Placeholder: {"{{nama}}"}, {"{{total}}"}, {"{{bulan}}"}, {"{{paket}}"}, {"{{harga}}"}
                             </p>
                             <span className="text-xs text-muted-foreground/60">
                                 {reminderTemplate.length} karakter
@@ -213,7 +215,7 @@ export default function RemindersPage() {
                         />
                         <div className="flex items-center justify-between">
                             <p className="text-xs text-muted-foreground">
-                                Placeholder: {"{{nama}}"}, {"{{total}}"}, {"{{bulan}}"}
+                                Placeholder: {"{{nama}}"}, {"{{total}}"}, {"{{bulan}}"}, {"{{paket}}"}, {"{{harga}}"}
                             </p>
                             <span className="text-xs text-muted-foreground/60">
                                 {receiptTemplate.length} karakter

@@ -3,15 +3,6 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, Banknote, FileText, AlertTriangle } from "lucide-react";
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { MonthYearFilter } from "@/components/MonthYearFilter";
 import { formatIDR } from "@/lib/formatCurrency";
@@ -23,7 +14,6 @@ interface DashboardData {
     overdueInvoices: number;
     operationals: number;
     profit: number;
-    overdueList: any[];
 }
 
 const METRIC_CARDS = [
@@ -98,7 +88,7 @@ export default function DashboardPage() {
                 <div className="flex flex-col gap-1">
                     <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Dashboard</h1>
                     <p className="text-muted-foreground">
-                        Ringkasan tagihan dan pelanggan bulan ini.
+                        Ringkasan iuran dan pelanggan bulan ini.
                     </p>
                 </div>
                 <MonthYearFilter
@@ -137,63 +127,6 @@ export default function DashboardPage() {
                 ))}
             </div>
 
-            {/* Overdue Invoices Table */}
-            <div className="flex flex-col gap-4 animate-fade-in-up" style={{ animationDelay: "200ms" }}>
-                <div className="flex items-center justify-between">
-                    <h2 className="text-lg font-semibold tracking-tight">
-                        Invoice Overdue
-                    </h2>
-                    {!isLoading && data?.overdueList && (
-                        <Badge variant="destructive" className="text-xs">
-                            {data.overdueList.length} overdue
-                        </Badge>
-                    )}
-                </div>
-                <div className="rounded-lg border bg-card overflow-x-auto">
-                    <Table className="min-w-[600px]">
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>No. Invoice</TableHead>
-                                <TableHead>Pelanggan</TableHead>
-                                <TableHead>Total</TableHead>
-                                <TableHead>Jatuh Tempo</TableHead>
-                                <TableHead className="text-right">Status</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {isLoading ? (
-                                Array.from({ length: 3 }).map((_, i) => (
-                                    <TableRow key={i}>
-                                        <TableCell><Skeleton className="h-4 w-28" /></TableCell>
-                                        <TableCell><Skeleton className="h-4 w-24" /></TableCell>
-                                        <TableCell><Skeleton className="h-4 w-20" /></TableCell>
-                                        <TableCell><Skeleton className="h-4 w-20" /></TableCell>
-                                        <TableCell className="text-right"><Skeleton className="h-5 w-16 ml-auto" /></TableCell>
-                                    </TableRow>
-                                ))
-                            ) : data?.overdueList?.length === 0 ? (
-                                <TableRow>
-                                    <TableCell colSpan={5} className="h-24 text-center text-muted-foreground">
-                                        Tidak ada invoice overdue. 🎉
-                                    </TableCell>
-                                </TableRow>
-                            ) : (
-                                data?.overdueList?.map((inv) => (
-                                    <TableRow key={inv.id}>
-                                        <TableCell className="font-medium font-mono text-xs">{inv.invoiceNumber}</TableCell>
-                                        <TableCell>{inv.customer?.name}</TableCell>
-                                        <TableCell className="font-semibold">{formatIDR(inv.total)}</TableCell>
-                                        <TableCell>{new Date(inv.dueDate).toLocaleDateString()}</TableCell>
-                                        <TableCell className="text-right">
-                                            <Badge variant="destructive">Overdue</Badge>
-                                        </TableCell>
-                                    </TableRow>
-                                ))
-                            )}
-                        </TableBody>
-                    </Table>
-                </div>
-            </div>
         </div>
     );
 }

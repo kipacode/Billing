@@ -47,7 +47,7 @@ export default async function CustomerDetailPage({
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight">Detail Pelanggan</h1>
                     <p className="text-muted-foreground">
-                        Informasi pelanggan dan riwayat tagihan tahun {currentYear}.
+                        Informasi pelanggan dan riwayat iuran tahun {currentYear}.
                     </p>
                 </div>
             </div>
@@ -87,7 +87,7 @@ export default async function CustomerDetailPage({
 
                 <Card>
                     <CardHeader>
-                        <CardTitle>Layanan & Tagihan</CardTitle>
+                        <CardTitle>Layanan & Iuran</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <div className="grid grid-cols-2 gap-4">
@@ -116,7 +116,7 @@ export default async function CustomerDetailPage({
 
             <Card>
                 <CardHeader>
-                    <CardTitle>Riwayat Tagihan {currentYear}</CardTitle>
+                    <CardTitle>Riwayat Iuran {currentYear}</CardTitle>
                     <CardDescription>Daftar invoice untuk tahun berjalan</CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -125,7 +125,7 @@ export default async function CustomerDetailPage({
                             <TableRow>
                                 <TableHead>No. Invoice</TableHead>
                                 <TableHead>Bulan</TableHead>
-                                <TableHead>Total Tagihan</TableHead>
+                                <TableHead>Total Iuran</TableHead>
                                 <TableHead>Jatuh Tempo</TableHead>
                                 <TableHead>Status</TableHead>
                                 <TableHead>Tanggal Bayar</TableHead>
@@ -135,7 +135,7 @@ export default async function CustomerDetailPage({
                             {customer.invoices.length === 0 ? (
                                 <TableRow>
                                     <TableCell colSpan={6} className="h-24 text-center text-muted-foreground">
-                                        Tidak ada tagihan ditemukan di tahun {currentYear}.
+                                        Tidak ada iuran ditemukan di tahun {currentYear}.
                                     </TableCell>
                                 </TableRow>
                             ) : (

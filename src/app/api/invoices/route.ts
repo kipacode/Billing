@@ -22,7 +22,11 @@ export async function GET(request: Request) {
         const invoices = await prisma.invoice.findMany({
             where: filters,
             include: {
-                customer: true,
+                customer: {
+                    include: {
+                        plan: true,
+                    },
+                },
                 payment: true,
             },
             orderBy: { dueDate: "asc" },

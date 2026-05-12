@@ -403,7 +403,7 @@ export default function CustomersPage() {
                     <DialogHeader>
                         <DialogTitle>Detail Pelanggan</DialogTitle>
                         <DialogDescription>
-                            Informasi pelanggan dan riwayat tagihan {new Date().getFullYear()}.
+                            Informasi pelanggan dan riwayat iuran {new Date().getFullYear()}.
                         </DialogDescription>
                     </DialogHeader>
                     {selectedCustomer && (
@@ -442,7 +442,7 @@ export default function CustomersPage() {
                             </div>
 
                             <div>
-                                <h4 className="text-sm font-semibold mb-3">Riwayat Tagihan {new Date().getFullYear()}</h4>
+                                <h4 className="text-sm font-semibold mb-3">Riwayat Iuran {new Date().getFullYear()}</h4>
                                 <div className="rounded-md border">
                                     <Table>
                                         <TableHeader>
@@ -456,11 +456,11 @@ export default function CustomersPage() {
                                         <TableBody>
                                             {isDetailLoading ? (
                                                 <TableRow>
-                                                    <TableCell colSpan={4} className="text-center py-4 text-muted-foreground">Memuat tagihan...</TableCell>
+                                                    <TableCell colSpan={4} className="text-center py-4 text-muted-foreground">Memuat iuran...</TableCell>
                                                 </TableRow>
                                             ) : selectedCustomer.invoices?.length === 0 ? (
                                                 <TableRow>
-                                                    <TableCell colSpan={4} className="text-center py-4 text-muted-foreground">Tidak ada tagihan tahun ini.</TableCell>
+                                                    <TableCell colSpan={4} className="text-center py-4 text-muted-foreground">Tidak ada iuran tahun ini.</TableCell>
                                                 </TableRow>
                                             ) : (
                                                 selectedCustomer.invoices?.map((inv: any) => (

@@ -66,8 +66,8 @@ export default function LoginPage() {
                         </CardDescription>
                     </CardHeader>
                     <form onSubmit={handleLogin}>
-                        <CardContent className="space-y-4 pt-2">
-                            <div className="space-y-2">
+                        <CardContent className="space-y-5 pt-4 pb-6">
+                            <div className="space-y-2.5">
                                 <Label htmlFor="username">Username</Label>
                                 <Input
                                     id="username"
@@ -77,10 +77,10 @@ export default function LoginPage() {
                                     onChange={(e) => setUsername(e.target.value)}
                                     required
                                     autoFocus
-                                    className="h-10"
+                                    className="h-11"
                                 />
                             </div>
-                            <div className="space-y-2">
+                            <div className="space-y-2.5">
                                 <Label htmlFor="password">Password</Label>
                                 <div className="relative">
                                     <Input
@@ -89,7 +89,7 @@ export default function LoginPage() {
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
                                         required
-                                        className="h-10 pr-10"
+                                        className="h-11 pr-10"
                                     />
                                     <button
                                         type="button"
@@ -112,8 +112,8 @@ export default function LoginPage() {
                                 </div>
                             )}
                         </CardContent>
-                        <CardFooter className="pt-2">
-                            <Button type="submit" className="w-full h-10" disabled={isLoading}>
+                        <CardFooter className="pt-6 pb-6">
+                            <Button type="submit" className="w-full h-11" disabled={isLoading}>
                                 {isLoading ? (
                                     <>
                                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />

@@ -59,13 +59,6 @@ export async function GET(request: Request) {
             where: { ...filters, status: "overdue" },
         });
 
-        // 4. Overdue Invoices List (for the table)
-        const overdueList = await prisma.invoice.findMany({
-            where: { ...filters, status: "overdue" },
-            include: { customer: true },
-            orderBy: { dueDate: "asc" },
-            take: 5,
-        });
 
         // 5. Total Operationals (Cash-Basis: expenses paid in the selected month/year)
         let opFilters: any = { status: "paid" };
@@ -87,7 +80,6 @@ export async function GET(request: Request) {
             activeCustomers,
             pendingInvoices,
             overdueInvoices,
-            overdueList,
             operationals,
             profit,
         });

@@ -12,6 +12,7 @@ import {
     BellRing,
     Wifi,
     LogOut,
+    Settings,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
@@ -101,17 +102,30 @@ export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
                             </span>
                         </div>
                     </div>
-                    <Tooltip>
-                        <TooltipTrigger asChild>
-                            <button
-                                onClick={handleLogout}
-                                className="p-2 text-muted-foreground hover:text-destructive transition-all duration-200 rounded-lg hover:bg-destructive/10"
-                            >
-                                <LogOut className="h-4 w-4" />
-                            </button>
-                        </TooltipTrigger>
-                        <TooltipContent side="right">Logout</TooltipContent>
-                    </Tooltip>
+                    <div className="flex items-center gap-1">
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Link
+                                    href="/users"
+                                    className="p-2 text-muted-foreground hover:text-primary transition-all duration-200 rounded-lg hover:bg-primary/10"
+                                >
+                                    <Settings className="h-4 w-4" />
+                                </Link>
+                            </TooltipTrigger>
+                            <TooltipContent side="right">Settings</TooltipContent>
+                        </Tooltip>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <button
+                                    onClick={handleLogout}
+                                    className="p-2 text-muted-foreground hover:text-destructive transition-all duration-200 rounded-lg hover:bg-destructive/10"
+                                >
+                                    <LogOut className="h-4 w-4" />
+                                </button>
+                            </TooltipTrigger>
+                            <TooltipContent side="right">Logout</TooltipContent>
+                        </Tooltip>
+                    </div>
                 </div>
             </div>
         </>
