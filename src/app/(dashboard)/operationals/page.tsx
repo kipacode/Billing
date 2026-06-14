@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { PlusCircle, MoreHorizontal, Pencil, Trash2, Wallet, CheckCircle2, Search } from "lucide-react";
+import { PlusCircle, MoreHorizontal, Pencil, Trash2, Wallet, CheckCircle2, Search, Zap } from "lucide-react";
 import {
     Dialog,
     DialogContent,
@@ -78,7 +78,8 @@ export default function OperationalsPage() {
     const [deleteOp, setDeleteOp] = useState<Operational | null>(null);
     const [payOp, setPayOp] = useState<Operational | null>(null);
     const [isLoading, setIsLoading] = useState(true);
-    
+    const [isGenerating, setIsGenerating] = useState(false);
+
     const [tab, setTab] = useState<FilterTab>("all");
     const [search, setSearch] = useState("");
     
@@ -199,6 +200,30 @@ export default function OperationalsPage() {
         }
     };
 
+    const handleGenerate = async () => {
+        setIsGenerating(true);
+        try {
+            const res = await fetch("/api/operationals/generate", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ month, year }),
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || "Gagal");
+
+            if (data.created > 0) {
+                toast.success(`${data.created} operasional berhasil dibuat untuk ${month}/${year}`);
+                await fetchData();
+            } else {
+                toast.info("Semua operasional untuk periode ini sudah ada.");
+            }
+        } catch (error) {
+            toast.error("Gagal generate operasional");
+        } finally {
+            setIsGenerating(false);
+        }
+    };
+
     const filtered = ops.filter((op) => {
         if (tab !== "all" && op.status !== tab) return false;
         if (
@@ -243,6 +268,16 @@ export default function OperationalsPage() {
                         onMonthChange={setMonth}
                         onYearChange={setYear}
                     />
+
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleGenerate}
+                        disabled={isGenerating}
+                    >
+                        <Zap className="mr-1.5 h-3.5 w-3.5" />
+                        {isGenerating ? "Generating..." : "Generate"}
+                    </Button>
 
                     <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
                         {/* @ts-expect-error React 19 typing conflict with Radix */}
