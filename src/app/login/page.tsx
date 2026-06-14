@@ -19,7 +19,6 @@ export default function LoginPage() {
     const [error, setError] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [isBiometricLoading, setIsBiometricLoading] = useState(false);
-    const [hasPasskey, setHasPasskey] = useState(false);
     const router = useRouter();
 
     useEffect(() => {
@@ -27,7 +26,6 @@ export default function LoginPage() {
         if (saved) {
             setUsername(saved);
             setRememberMe(true);
-            setHasPasskey(true);
         }
     }, []);
 
@@ -203,7 +201,7 @@ export default function LoginPage() {
                                 )}
                             </Button>
 
-                            {hasPasskey && (
+                            {username && (
                                 <Button
                                     type="button"
                                     variant="outline"
