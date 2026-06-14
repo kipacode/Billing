@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { usePathname } from "next/navigation";
-import { Bell, Menu } from "lucide-react";
+import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
     Sheet,
@@ -10,6 +10,7 @@ import {
     SheetTitle,
 } from "@/components/ui/sheet";
 import { SidebarContent } from "@/components/Sidebar";
+import { NotificationBell } from "@/components/NotificationBell";
 
 const PAGE_TITLES: Record<string, string> = {
     "/dashboard": "Dashboard",
@@ -46,11 +47,7 @@ export function Header() {
                     </h2>
                 </div>
                 <div className="flex items-center gap-2">
-                    <Button variant="ghost" size="icon" className="text-muted-foreground relative">
-                        <Bell className="h-4 w-4" />
-                        <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-destructive" />
-                        <span className="sr-only">Notifications</span>
-                    </Button>
+                    <NotificationBell />
                 </div>
             </header>
 
