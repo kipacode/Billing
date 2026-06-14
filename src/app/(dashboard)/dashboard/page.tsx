@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, Banknote, FileText, AlertTriangle } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -20,6 +21,7 @@ const METRIC_CARDS = [
     {
         key: "activeCustomers",
         label: "Active Customers",
+        href: "/customers",
         icon: Users,
         iconBg: "bg-blue-500/10",
         iconColor: "text-blue-600",
@@ -29,6 +31,7 @@ const METRIC_CARDS = [
     {
         key: "revenue",
         label: "Total Revenue",
+        href: "/reports",
         icon: Banknote,
         iconBg: "bg-emerald-500/10",
         iconColor: "text-emerald-600",
@@ -38,6 +41,7 @@ const METRIC_CARDS = [
     {
         key: "pendingInvoices",
         label: "Pending Invoices",
+        href: "/invoices",
         icon: FileText,
         iconBg: "bg-amber-500/10",
         iconColor: "text-amber-600",
@@ -47,6 +51,7 @@ const METRIC_CARDS = [
     {
         key: "overdueInvoices",
         label: "Overdue Invoices",
+        href: "/reminders",
         icon: AlertTriangle,
         iconBg: "bg-red-500/10",
         iconColor: "text-red-600",
@@ -102,28 +107,34 @@ export default function DashboardPage() {
             {/* Metric Cards */}
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 stagger-children">
                 {METRIC_CARDS.map((metric) => (
-                    <Card key={metric.key} className="card-hover">
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium text-muted-foreground">
-                                {metric.label}
-                            </CardTitle>
-                            <div className={`p-2 rounded-lg ${metric.iconBg}`}>
-                                <metric.icon className={`h-4 w-4 ${metric.iconColor}`} />
-                            </div>
-                        </CardHeader>
-                        <CardContent>
-                            {isLoading ? (
-                                <Skeleton className="h-8 w-24 mb-1" />
-                            ) : (
-                                <div className="text-2xl font-bold">
-                                    {metric.format((data as any)?.[metric.key] || 0)}
+                    <Link
+                        key={metric.key}
+                        href={metric.href}
+                        className="rounded-xl transition-transform active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    >
+                        <Card className="card-hover h-full cursor-pointer">
+                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                <CardTitle className="text-sm font-medium text-muted-foreground">
+                                    {metric.label}
+                                </CardTitle>
+                                <div className={`p-2 rounded-lg ${metric.iconBg}`}>
+                                    <metric.icon className={`h-4 w-4 ${metric.iconColor}`} />
                                 </div>
-                            )}
-                            <p className="text-xs text-muted-foreground mt-1">
-                                {metric.subtitle}
-                            </p>
-                        </CardContent>
-                    </Card>
+                            </CardHeader>
+                            <CardContent>
+                                {isLoading ? (
+                                    <Skeleton className="h-8 w-24 mb-1" />
+                                ) : (
+                                    <div className="text-2xl font-bold">
+                                        {metric.format((data as any)?.[metric.key] || 0)}
+                                    </div>
+                                )}
+                                <p className="text-xs text-muted-foreground mt-1">
+                                    {metric.subtitle}
+                                </p>
+                            </CardContent>
+                        </Card>
+                    </Link>
                 ))}
             </div>
 

@@ -149,7 +149,46 @@ export default function ReportsPage() {
                         </Badge>
                     )}
                 </div>
-                <div className="rounded-lg border bg-card overflow-x-auto">
+                {/* Mobile card list */}
+                <div className="flex flex-col gap-2.5 md:hidden">
+                    {isLoading ? (
+                        Array.from({ length: 5 }).map((_, i) => (
+                            <div key={i} className="rounded-xl border bg-card p-4">
+                                <div className="flex items-center justify-between">
+                                    <div className="space-y-2">
+                                        <Skeleton className="h-4 w-32" />
+                                        <Skeleton className="h-3 w-20" />
+                                    </div>
+                                    <Skeleton className="h-4 w-20" />
+                                </div>
+                            </div>
+                        ))
+                    ) : transactions.length === 0 ? (
+                        <div className="rounded-xl border bg-card p-8 text-center text-sm text-muted-foreground">
+                            Tidak ada transaksi untuk periode ini.
+                        </div>
+                    ) : (
+                        transactions.map((tx) => (
+                            <div key={tx.id} className="flex items-center justify-between gap-3 rounded-xl border bg-card p-4">
+                                <div className="min-w-0 flex-1">
+                                    <div className="truncate font-medium">{tx.description}</div>
+                                    <div className="mt-0.5 flex items-center gap-2 text-xs text-muted-foreground">
+                                        <span className="capitalize">{tx.type}</span>
+                                        <span>·</span>
+                                        <span>{new Date(tx.date).toLocaleDateString("id-ID")}</span>
+                                    </div>
+                                    <div className="mt-0.5 font-mono text-[11px] text-muted-foreground">{tx.reference}</div>
+                                </div>
+                                <div className={`shrink-0 text-right font-bold ${tx.type === "revenue" ? "text-emerald-600" : "text-red-600"}`}>
+                                    {tx.type === "revenue" ? "+" : ""}{formatIDR(tx.amount)}
+                                </div>
+                            </div>
+                        ))
+                    )}
+                </div>
+
+                {/* Table (desktop) */}
+                <div className="hidden rounded-lg border bg-card overflow-x-auto md:block">
                     <Table className="min-w-[600px]">
                         <TableHeader>
                             <TableRow>

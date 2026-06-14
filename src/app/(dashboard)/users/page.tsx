@@ -171,7 +171,64 @@ export default function UsersPage() {
                 </Dialog>
             </div>
 
-            <div className="rounded-lg border bg-card overflow-x-auto shadow-sm">
+            {/* Mobile card list */}
+            <div className="flex flex-col gap-2.5 md:hidden">
+                {isLoading ? (
+                    Array.from({ length: 3 }).map((_, i) => (
+                        <div key={i} className="rounded-xl border bg-card p-4 flex items-center gap-3">
+                            <Skeleton className="h-10 w-10 rounded-full" />
+                            <div className="space-y-2">
+                                <Skeleton className="h-4 w-28" />
+                                <Skeleton className="h-3 w-20" />
+                            </div>
+                        </div>
+                    ))
+                ) : admins.length === 0 ? (
+                    <div className="rounded-xl border bg-card p-8 text-center text-sm text-muted-foreground">
+                        Belum ada user.
+                    </div>
+                ) : (
+                    admins.map((admin) => (
+                        <div key={admin.id} className="flex items-center gap-3 rounded-xl border bg-card p-4">
+                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                                <UserIcon className="h-5 w-5" />
+                            </div>
+                            <div className="min-w-0 flex-1">
+                                <div className="truncate font-semibold">{admin.username}</div>
+                                <div className="flex items-center gap-1 text-[10px] uppercase tracking-wider text-muted-foreground">
+                                    <ShieldCheck className="h-3 w-3" />
+                                    Administrator
+                                </div>
+                            </div>
+                            <DropdownMenu>
+                                {/* @ts-expect-error React 19 typing conflict with Radix */}
+                                <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" size="icon" className="shrink-0">
+                                        <MoreHorizontal className="h-5 w-5" />
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="w-[160px]">
+                                    <DropdownMenuItem onClick={() => setEditAdmin(admin)} className="cursor-pointer">
+                                        <Pencil className="mr-2 h-4 w-4" />
+                                        Edit User
+                                    </DropdownMenuItem>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem
+                                        className="text-destructive cursor-pointer focus:bg-destructive/10 focus:text-destructive"
+                                        onClick={() => setDeleteAdmin(admin)}
+                                    >
+                                        <Trash2 className="mr-2 h-4 w-4" />
+                                        Hapus User
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        </div>
+                    ))
+                )}
+            </div>
+
+            {/* Table (desktop) */}
+            <div className="hidden rounded-lg border bg-card overflow-x-auto shadow-sm md:block">
                 <Table className="min-w-[450px]">
                     <TableHeader>
                         <TableRow className="hover:bg-transparent">

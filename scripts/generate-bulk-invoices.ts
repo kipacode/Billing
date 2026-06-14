@@ -33,7 +33,7 @@ async function main() {
             const amount = customer.plan.price;
             const discount = customer.discount;
             const total = amount - discount;
-            const dueDate = new Date(year, month - 1, 10); // 10th of the month
+            const dueDate = new Date(year, month - 1, 20); // 20th of the month
 
             await prisma.invoice.create({
                 data: {

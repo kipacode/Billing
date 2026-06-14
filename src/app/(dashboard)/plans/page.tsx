@@ -176,7 +176,61 @@ export default function PlansPage() {
                 </Dialog>
             </div>
 
-            <div className="rounded-lg border bg-card overflow-x-auto">
+            {/* Mobile card list */}
+            <div className="flex flex-col gap-2.5 md:hidden">
+                {isLoading ? (
+                    Array.from({ length: 3 }).map((_, i) => (
+                        <div key={i} className="rounded-xl border bg-card p-4 space-y-2">
+                            <Skeleton className="h-4 w-24" />
+                            <Skeleton className="h-3 w-16" />
+                        </div>
+                    ))
+                ) : plans.length === 0 ? (
+                    <div className="rounded-xl border bg-card p-8 text-center text-sm text-muted-foreground">
+                        Belum ada paket.
+                    </div>
+                ) : (
+                    plans.map((plan) => (
+                        <div key={plan.id} className="flex items-center justify-between gap-3 rounded-xl border bg-card p-4">
+                            <div className="min-w-0 flex-1">
+                                <div className="flex items-center gap-2">
+                                    <span className="truncate font-semibold">{plan.name}</span>
+                                    <Badge variant="secondary" className="shrink-0 font-mono text-[10px]">
+                                        {plan.speedMbps} Mbps
+                                    </Badge>
+                                </div>
+                                <div className="mt-1 text-lg font-bold tracking-tight">{formatIDR(plan.price)}</div>
+                                <div className="text-xs text-muted-foreground">per bulan</div>
+                            </div>
+                            <DropdownMenu>
+                                {/* @ts-expect-error React 19 typing conflict with Radix */}
+                                <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" size="icon" className="shrink-0">
+                                        <MoreHorizontal className="h-5 w-5" />
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                    <DropdownMenuItem onClick={() => setEditPlan(plan)}>
+                                        <Pencil className="mr-2 h-4 w-4" />
+                                        Edit
+                                    </DropdownMenuItem>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem
+                                        className="text-destructive"
+                                        onClick={() => setDeletePlan(plan)}
+                                    >
+                                        <Trash2 className="mr-2 h-4 w-4" />
+                                        Hapus
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        </div>
+                    ))
+                )}
+            </div>
+
+            {/* Table (desktop) */}
+            <div className="hidden rounded-lg border bg-card overflow-x-auto md:block">
                 <Table className="min-w-[450px]">
                     <TableHeader>
                         <TableRow>

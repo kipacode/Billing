@@ -337,8 +337,88 @@ export default function OperationalsPage() {
                 </div>
             </div>
 
-            {/* Table */}
-            <div className="rounded-lg border bg-card overflow-x-auto">
+            {/* Mobile card list */}
+            <div className="flex flex-col gap-2.5 md:hidden">
+                {isLoading ? (
+                    Array.from({ length: 3 }).map((_, i) => (
+                        <div key={i} className="rounded-xl border bg-card p-4">
+                            <div className="flex items-center justify-between">
+                                <div className="space-y-2">
+                                    <Skeleton className="h-4 w-32" />
+                                    <Skeleton className="h-3 w-24" />
+                                </div>
+                                <Skeleton className="h-6 w-16 rounded-full" />
+                            </div>
+                        </div>
+                    ))
+                ) : filtered.length === 0 ? (
+                    <div className="rounded-xl border bg-card p-8 text-center text-sm text-muted-foreground">
+                        Tidak ada biaya operasional ditemukan.
+                    </div>
+                ) : (
+                    filtered.map((op) => (
+                        <div
+                            key={op.id}
+                            className="rounded-xl border bg-card p-4"
+                        >
+                            <div className="flex items-start justify-between gap-3">
+                                <div className="min-w-0 flex-1">
+                                    <div className="flex items-center gap-2">
+                                        <span className="truncate font-semibold">{op.name}</span>
+                                        <Badge variant={STATUS_VARIANT[op.status]} className="shrink-0">
+                                            {STATUS_LABELS[op.status]}
+                                        </Badge>
+                                    </div>
+                                    <div className="mt-0.5 text-xs text-muted-foreground">
+                                        Jatuh tempo {new Date(op.expenseDate).toLocaleDateString("id-ID")}
+                                    </div>
+                                    <div className="mt-1.5 text-lg font-bold tracking-tight">
+                                        {formatIDR(op.amount)}
+                                    </div>
+                                </div>
+                                <DropdownMenu>
+                                    {/* @ts-expect-error React 19 typing conflict with Radix */}
+                                    <DropdownMenuTrigger asChild>
+                                        <Button variant="ghost" size="icon" className="shrink-0">
+                                            <MoreHorizontal className="h-5 w-5" />
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end">
+                                        <DropdownMenuItem onClick={() => setEditOp(op)}>
+                                            <Pencil className="mr-2 h-4 w-4" />
+                                            Edit
+                                        </DropdownMenuItem>
+                                        <DropdownMenuSeparator />
+                                        <DropdownMenuItem
+                                            className="text-destructive"
+                                            onClick={() => setDeleteOp(op)}
+                                        >
+                                            <Trash2 className="mr-2 h-4 w-4" />
+                                            Hapus
+                                        </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+                            </div>
+                            {op.status !== "paid" ? (
+                                <Button
+                                    onClick={() => setPayOp(op)}
+                                    className="mt-3 w-full bg-emerald-600 hover:bg-emerald-700"
+                                >
+                                    <CheckCircle2 className="mr-2 h-4 w-4" />
+                                    Tandai Lunas
+                                </Button>
+                            ) : (
+                                <div className="mt-3 rounded-lg bg-muted/60 px-3 py-2 text-center text-xs text-muted-foreground">
+                                    Lunas {op.paidDate ? new Date(op.paidDate).toLocaleDateString("id-ID") : ""}
+                                </div>
+                            )}
+                        </div>
+                    ))
+                )}
+            </div>
+
+            {/* Table (desktop) */}
+            <div className="hidden rounded-lg border bg-card overflow-x-auto md:block">
                 <Table className="min-w-[650px]">
                     <TableHeader>
                         <TableRow>

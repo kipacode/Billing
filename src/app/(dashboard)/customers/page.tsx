@@ -284,7 +284,78 @@ export default function CustomersPage() {
                 </Select>
             </div>
 
-            <div className="rounded-lg border bg-card overflow-x-auto">
+            {/* Mobile card list */}
+            <div className="flex flex-col gap-2.5 md:hidden">
+                {isLoading ? (
+                    Array.from({ length: 5 }).map((_, i) => (
+                        <div key={i} className="rounded-xl border bg-card p-4">
+                            <div className="space-y-2">
+                                <Skeleton className="h-4 w-32" />
+                                <Skeleton className="h-3 w-24" />
+                            </div>
+                        </div>
+                    ))
+                ) : filtered.length === 0 ? (
+                    <div className="rounded-xl border bg-card p-8 text-center text-sm text-muted-foreground">
+                        Tidak ada pelanggan ditemukan.
+                    </div>
+                ) : (
+                    filtered.map((customer) => (
+                        <div
+                            key={customer.id}
+                            className="flex items-center gap-3 rounded-xl border bg-card p-4 transition-colors active:bg-muted/60"
+                        >
+                            <button
+                                onClick={() => handleRowClick(customer)}
+                                className="min-w-0 flex-1 text-left"
+                            >
+                                <div className="flex items-center gap-2">
+                                    <span className="truncate font-semibold">{customer.name}</span>
+                                    <Badge variant="secondary" className="shrink-0 text-[10px]">
+                                        Area {customer.area}
+                                    </Badge>
+                                </div>
+                                <div className="mt-0.5 text-xs text-muted-foreground">
+                                    {customer.whatsapp}
+                                </div>
+                                <div className="mt-1 text-sm">
+                                    <span className="font-medium">{customer.plan?.name}</span>
+                                    <span className="text-muted-foreground"> · {customer.plan?.speedMbps}Mbps</span>
+                                </div>
+                            </button>
+                            <DropdownMenu>
+                                {/* @ts-expect-error React 19 typing conflict with Radix */}
+                                <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" size="icon" className="shrink-0">
+                                        <MoreHorizontal className="h-5 w-5" />
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                    <DropdownMenuItem onClick={() => setEditCustomer(customer)}>
+                                        <Pencil className="mr-2 h-4 w-4" />
+                                        Edit
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => setDuplicateCustomer(customer)}>
+                                        <Copy className="mr-2 h-4 w-4" />
+                                        Duplikat
+                                    </DropdownMenuItem>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem
+                                        className="text-destructive"
+                                        onClick={() => setDeleteCustomer(customer)}
+                                    >
+                                        <Trash2 className="mr-2 h-4 w-4" />
+                                        Hapus
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        </div>
+                    ))
+                )}
+            </div>
+
+            {/* Table (desktop) */}
+            <div className="hidden rounded-lg border bg-card overflow-x-auto md:block">
                 <Table className="min-w-[700px]">
                     <TableHeader>
                         <TableRow>

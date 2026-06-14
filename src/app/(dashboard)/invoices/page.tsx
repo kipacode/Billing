@@ -382,8 +382,71 @@ export default function InvoicesPage() {
                 </div>
             </div>
 
-            {/* Table */}
-            <div className="rounded-lg border bg-card overflow-x-auto">
+            {/* Mobile card list */}
+            <div className="flex flex-col gap-2.5 md:hidden">
+                {isLoading ? (
+                    Array.from({ length: 5 }).map((_, i) => (
+                        <div key={i} className="rounded-xl border bg-card p-4">
+                            <div className="flex items-center justify-between">
+                                <div className="space-y-2">
+                                    <Skeleton className="h-4 w-32" />
+                                    <Skeleton className="h-3 w-24" />
+                                </div>
+                                <Skeleton className="h-6 w-16 rounded-full" />
+                            </div>
+                        </div>
+                    ))
+                ) : filtered.length === 0 ? (
+                    <div className="rounded-xl border bg-card p-8 text-center text-sm text-muted-foreground">
+                        Tidak ada invoice ditemukan.
+                    </div>
+                ) : (
+                    filtered.map((inv) => (
+                        <button
+                            key={inv.id}
+                            onClick={() => handleRowClick(inv)}
+                            className="flex w-full items-center justify-between gap-3 rounded-xl border bg-card p-4 text-left transition-colors active:bg-muted/60"
+                        >
+                            <div className="min-w-0 flex-1">
+                                <div className="flex items-center gap-2">
+                                    <span className="truncate font-semibold">{inv.customer?.name}</span>
+                                    <Badge variant={STATUS_VARIANT[inv.status]} className="shrink-0">
+                                        {STATUS_LABELS[inv.status]}
+                                    </Badge>
+                                </div>
+                                <div className="mt-0.5 font-mono text-[11px] text-muted-foreground">
+                                    {inv.invoiceNumber}
+                                </div>
+                                <div className="mt-1.5 text-lg font-bold tracking-tight">
+                                    {formatIDR(inv.total)}
+                                </div>
+                            </div>
+                            <div className="shrink-0">
+                                {inv.status !== "paid" ? (
+                                    <span className="flex items-center gap-1 rounded-full bg-emerald-50 px-3 py-1.5 text-sm font-medium text-emerald-600 dark:bg-emerald-950/40">
+                                        <CheckCircle2 className="h-4 w-4" />
+                                        Bayar
+                                    </span>
+                                ) : (
+                                    <div className="flex flex-col items-end text-right">
+                                        <span className="text-xs font-medium">
+                                            {inv.payment?.paidAt ? new Date(inv.payment.paidAt).toLocaleDateString("id-ID") : ""}
+                                        </span>
+                                        {inv.payment?.method && (
+                                            <span className="text-[10px] uppercase text-muted-foreground">
+                                                {inv.payment.method}
+                                            </span>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+                        </button>
+                    ))
+                )}
+            </div>
+
+            {/* Table (desktop) */}
+            <div className="hidden rounded-lg border bg-card overflow-x-auto md:block">
                 <Table className="min-w-[650px]">
                     <TableHeader>
                         <TableRow>

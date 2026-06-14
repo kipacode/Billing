@@ -106,8 +106,50 @@ export default function RemindersPage() {
                 />
             </div>
 
-            {/* Overdue List */}
-            <div className="rounded-lg border bg-card overflow-x-auto">
+            {/* Overdue List — mobile cards */}
+            <div className="flex flex-col gap-2.5 md:hidden">
+                {isLoading ? (
+                    Array.from({ length: 3 }).map((_, i) => (
+                        <div key={i} className="rounded-xl border bg-card p-4 space-y-2">
+                            <Skeleton className="h-4 w-32" />
+                            <Skeleton className="h-3 w-24" />
+                            <Skeleton className="h-9 w-full rounded-md" />
+                        </div>
+                    ))
+                ) : overdueInvoices.length === 0 ? (
+                    <div className="rounded-xl border bg-card p-8 text-center text-sm text-muted-foreground">
+                        Tidak ada invoice overdue. 🎉
+                    </div>
+                ) : (
+                    overdueInvoices.map((inv) => (
+                        <div key={inv.id} className="rounded-xl border bg-card p-4">
+                            <div className="flex items-start justify-between gap-3">
+                                <div className="min-w-0 flex-1">
+                                    <div className="truncate font-semibold">{inv.customer?.name}</div>
+                                    <div className="mt-0.5 font-mono text-[11px] text-muted-foreground">{inv.invoiceNumber}</div>
+                                    <div className="mt-0.5 text-xs text-muted-foreground">{inv.customer?.whatsapp}</div>
+                                </div>
+                                <div className="shrink-0 text-right">
+                                    <div className="font-bold">{formatIDR(inv.total)}</div>
+                                    <div className="text-[11px] text-destructive">
+                                        Tempo {new Date(inv.dueDate).toLocaleDateString("id-ID")}
+                                    </div>
+                                </div>
+                            </div>
+                            <Button
+                                onClick={() => handleSendReminder(inv)}
+                                className="mt-3 w-full bg-emerald-600 hover:bg-emerald-700"
+                            >
+                                <Send className="mr-2 h-4 w-4" />
+                                Kirim Pengingat WA
+                            </Button>
+                        </div>
+                    ))
+                )}
+            </div>
+
+            {/* Overdue List — desktop table */}
+            <div className="hidden rounded-lg border bg-card overflow-x-auto md:block">
                 <Table className="min-w-[650px]">
                     <TableHeader>
                         <TableRow>
