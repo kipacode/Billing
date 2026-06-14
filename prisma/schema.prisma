@@ -13,6 +13,8 @@ model Admin {
   passwordHash String   @map("password_hash")
   createdAt    DateTime @default(now()) @map("created_at")
 
+  passkeys PasskeyCredential[]
+
   @@map("admins")
 }
 
@@ -95,6 +97,19 @@ model Operational {
   updatedAt   DateTime  @updatedAt @map("updated_at")
 
   @@map("operationals")
+}
+
+model PasskeyCredential {
+  id           Int      @id @default(autoincrement())
+  adminId      Int      @map("admin_id")
+  credentialId String   @unique @map("credential_id")
+  publicKey    Bytes    @map("public_key")
+  counter      BigInt   @default(0)
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  admin Admin @relation(fields: [adminId], references: [id], onDelete: Cascade)
+
+  @@map("passkey_credentials")
 }
 
 model ReminderTemplate {

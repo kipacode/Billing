@@ -8,7 +8,7 @@ const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || "default_s
 
 export async function POST(req: Request) {
     try {
-        const { username, password } = await req.json();
+        const { username, password, rememberMe } = await req.json();
 
         // Find admin
         const admin = await prisma.admin.findUnique({
@@ -27,18 +27,20 @@ export async function POST(req: Request) {
         }
 
         // Create JWT token
+        const expiry = rememberMe ? "7d" : "24h";
+        const maxAge = rememberMe ? 60 * 60 * 24 * 7 : 60 * 60 * 24;
+
         const token = await new SignJWT({ sub: admin.id.toString(), username: admin.username })
             .setProtectedHeader({ alg: "HS256" })
-            .setExpirationTime("24h")
+            .setExpirationTime(expiry)
             .sign(JWT_SECRET);
 
-        // Set HTTP-only cookie
         const res = NextResponse.json({ success: true });
         res.cookies.set("admin_token", token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
             sameSite: "lax",
-            maxAge: 60 * 60 * 24, // 24 hours
+            maxAge,
             path: "/",
         });
 

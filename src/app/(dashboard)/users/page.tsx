@@ -13,7 +13,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import { PlusCircle, MoreHorizontal, Pencil, Trash2, ShieldCheck, User as UserIcon } from "lucide-react";
+import { PlusCircle, MoreHorizontal, Pencil, Trash2, ShieldCheck, User as UserIcon, Fingerprint, CheckCircle2 } from "lucide-react";
+import { startRegistration } from "@simplewebauthn/browser";
 import {
     Dialog,
     DialogContent,
@@ -52,6 +53,8 @@ interface Admin {
 export default function UsersPage() {
     const [admins, setAdmins] = useState<Admin[]>([]);
     const [isAddOpen, setIsAddOpen] = useState(false);
+    const [isRegisteringPasskey, setIsRegisteringPasskey] = useState(false);
+    const [passkeyRegistered, setPasskeyRegistered] = useState(false);
     const [editAdmin, setEditAdmin] = useState<Admin | null>(null);
     const [deleteAdmin, setDeleteAdmin] = useState<Admin | null>(null);
     const [isLoading, setIsLoading] = useState(true);
@@ -136,6 +139,36 @@ export default function UsersPage() {
         }
     };
 
+    const handleRegisterPasskey = async () => {
+        setIsRegisteringPasskey(true);
+        try {
+            const optRes = await fetch("/api/auth/webauthn/register-options", { method: "POST" });
+            if (!optRes.ok) throw new Error("Gagal mendapatkan opsi pendaftaran");
+            const options = await optRes.json();
+
+            const credential = await startRegistration({ optionsJSON: options });
+
+            const verRes = await fetch("/api/auth/webauthn/register", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(credential),
+            });
+
+            if (!verRes.ok) throw new Error("Pendaftaran gagal");
+
+            setPasskeyRegistered(true);
+            toast.success("Sidik jari berhasil didaftarkan! Sekarang Anda bisa login tanpa password.");
+        } catch (err: unknown) {
+            if (err instanceof Error && err.name === "NotAllowedError") {
+                toast.error("Pendaftaran dibatalkan.");
+            } else {
+                toast.error(err instanceof Error ? err.message : "Gagal mendaftarkan sidik jari");
+            }
+        } finally {
+            setIsRegisteringPasskey(false);
+        }
+    };
+
     return (
         <div className="flex flex-col gap-6">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -152,6 +185,22 @@ export default function UsersPage() {
                         Kelola akun operator sistem dan hak akses.
                     </p>
                 </div>
+
+                <Button
+                    variant="outline"
+                    className="gap-2 shrink-0"
+                    onClick={handleRegisterPasskey}
+                    disabled={isRegisteringPasskey || passkeyRegistered}
+                >
+                    {passkeyRegistered ? (
+                        <CheckCircle2 className="h-4 w-4 text-green-500" />
+                    ) : isRegisteringPasskey ? (
+                        <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                    ) : (
+                        <Fingerprint className="h-4 w-4" />
+                    )}
+                    {passkeyRegistered ? "Sidik Jari Terdaftar" : "Daftarkan Sidik Jari"}
+                </Button>
 
                 <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
                     {/* @ts-expect-error React 19 typing conflict with Radix */}
