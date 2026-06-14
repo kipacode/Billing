@@ -10,18 +10,23 @@ const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || "default_s
 
 export async function POST(req: Request) {
     try {
-        const { adminId, credential } = await req.json();
+        const { adminId, credential, discoverable } = await req.json();
 
         const passkey = await prisma.passkeyCredential.findUnique({
             where: { credentialId: credential.id },
             include: { admin: true },
         });
 
-        if (!passkey || passkey.adminId !== adminId) {
+        if (!passkey) {
             return NextResponse.json({ error: "Passkey not found" }, { status: 404 });
         }
 
-        const expectedChallenge = getChallenge(`login:${adminId}`);
+        if (!discoverable && passkey.adminId !== adminId) {
+            return NextResponse.json({ error: "Passkey not found" }, { status: 404 });
+        }
+
+        const challengeKey = discoverable ? "discoverable" : `login:${adminId}`;
+        const expectedChallenge = getChallenge(challengeKey);
         if (!expectedChallenge) return NextResponse.json({ error: "Challenge expired" }, { status: 400 });
 
         const { rpID, origin } = getRpConfig();

@@ -62,42 +62,33 @@ export default function LoginPage() {
     };
 
     const handleBiometricLogin = async () => {
-        if (!username) {
-            setError("Masukkan username terlebih dahulu.");
-            return;
-        }
         setError("");
         setIsBiometricLoading(true);
 
         try {
-            const optRes = await fetch("/api/auth/webauthn/login-options", {
+            // Use discoverable flow — no username needed
+            const optRes = await fetch("/api/auth/webauthn/login-options-discoverable", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ username }),
             });
 
             if (!optRes.ok) {
-                setError("Sidik jari belum didaftarkan untuk akun ini.");
+                setError("Gagal memulai autentikasi sidik jari.");
                 return;
             }
 
-            const { adminId, ...options } = await optRes.json();
-
+            const options = await optRes.json();
             const credential = await startAuthentication({ optionsJSON: options });
 
             const verRes = await fetch("/api/auth/webauthn/login", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ adminId, credential }),
+                body: JSON.stringify({ credential, discoverable: true }),
             });
 
             if (!verRes.ok) {
                 const d = await verRes.json();
                 setError(d.error || "Verifikasi sidik jari gagal.");
             } else {
-                if (rememberMe || localStorage.getItem(REMEMBER_KEY)) {
-                    localStorage.setItem(REMEMBER_KEY, username);
-                }
                 router.push("/dashboard");
                 router.refresh();
             }
@@ -190,6 +181,27 @@ export default function LoginPage() {
                             )}
                         </CardContent>
                         <CardFooter className="flex flex-col gap-3 pt-2 pb-6">
+                            <Button
+                                type="button"
+                                variant="outline"
+                                className="w-full h-12 gap-2 border-primary/30 text-primary hover:bg-primary/5"
+                                onClick={handleBiometricLogin}
+                                disabled={isBiometricLoading}
+                            >
+                                {isBiometricLoading ? (
+                                    <Loader2 className="h-5 w-5 animate-spin" />
+                                ) : (
+                                    <Fingerprint className="h-5 w-5" />
+                                )}
+                                Masuk dengan Sidik Jari
+                            </Button>
+
+                            <div className="relative w-full flex items-center gap-2">
+                                <div className="flex-1 h-px bg-border" />
+                                <span className="text-xs text-muted-foreground">atau</span>
+                                <div className="flex-1 h-px bg-border" />
+                            </div>
+
                             <Button type="submit" className="w-full h-11" disabled={isLoading}>
                                 {isLoading ? (
                                     <>
@@ -197,26 +209,9 @@ export default function LoginPage() {
                                         Masuk...
                                     </>
                                 ) : (
-                                    "Masuk"
+                                    "Masuk dengan Password"
                                 )}
                             </Button>
-
-                            {username && (
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    className="w-full h-11 gap-2"
-                                    onClick={handleBiometricLogin}
-                                    disabled={isBiometricLoading}
-                                >
-                                    {isBiometricLoading ? (
-                                        <Loader2 className="h-4 w-4 animate-spin" />
-                                    ) : (
-                                        <Fingerprint className="h-5 w-5" />
-                                    )}
-                                    Masuk dengan Sidik Jari
-                                </Button>
-                            )}
                         </CardFooter>
                     </form>
                 </Card>
